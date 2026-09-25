@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IPv4 und IPv6 – Schicht 3 Quiz</title>
+<style>
+  :root{
+    --bg:#fff; --card:#fff; --text:#222; --muted:#666;
+    --accent:#888; --accent2:#aaa; --ok:#2e7d32; --bad:#c62828;
+    --border:#ddd; --btnText:#222;
+    padding-top: env(safe-area-inset-top,0px);
+    padding-bottom: env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; transition:background .3s,color .3s;
+  }
+  .app{width:100%; max-width:560px; padding:24px;}
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:28px 24px; box-shadow:0 4px 20px rgba(0,0,0,.08);
+  }
+  h1{font-size:1.5rem; margin:0 0 2px; letter-spacing:.2px;}
+  h2{font-size:1rem; margin:0 0 20px; color:var(--muted); font-weight:600;}
+  .hidden{display:none !important;}
+
+  /* Theme-Auswahl */
+  .theme-grid{display:grid; gap:12px; margin-top:18px;}
+  .theme-btn{
+    border:2px solid var(--border); border-radius:12px; padding:14px 16px;
+    cursor:pointer; font-size:1rem; text-align:left; display:flex; align-items:center; gap:12px;
+    background:transparent; color:var(--text); transition:transform .15s, border-color .15s;
+  }
+  .theme-btn:hover{transform:translateY(-2px); border-color:var(--accent);}
+  .swatch{width:28px; height:28px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.15);}
+  .sw-pastell{background:linear-gradient(135deg,#c8f2d4,#cfe8ff,#ffd6e8,#ffe3c2);}
+  .sw-kraeftig{background:linear-gradient(135deg,#7a4fa3,#b0468f,#e08b2b,#c9a6e0);}
+  .sw-dunkel{background:linear-gradient(135deg,#1b1f2a,#3a2f52,#22303a);}
+
+  button.primary{
+    margin-top:22px; width:100%; padding:14px; border:none; border-radius:10px;
+    font-size:1.05rem; font-weight:600; cursor:pointer; background:var(--accent); color:var(--btnText);
+    transition:opacity .15s;
+  }
+  button.primary:hover{opacity:.9;}
+  button.secondary{
+    margin-top:10px; width:100%; padding:12px; border:1px solid var(--border); border-radius:10px;
+    background:transparent; color:var(--text); font-size:.95rem; cursor:pointer;
+  }
+
+  /* Quiz */
+  .statrow{display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:8px;}
+  .progress-outer{background:var(--border); border-radius:8px; height:10px; overflow:hidden; margin-bottom:20px;}
+  .progress-inner{background:var(--accent); height:100%; width:0%; transition:width .3s;}
+  .qtext{font-size:1.15rem; margin:0 0 18px; line-height:1.4;}
+  .options{display:grid; gap:10px;}
+  .opt{
+    border:2px solid var(--border); border-radius:10px; padding:12px 14px; text-align:left;
+    cursor:pointer; font-size:1rem; background:transparent; color:var(--text);
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt.correct{border-color:var(--ok); background:rgba(46,125,50,.12);}
+  .opt.wrong{border-color:var(--bad); background:rgba(198,40,40,.12);}
+  .opt:disabled{cursor:default;}
+  .verdict{margin-top:16px; font-weight:700; font-size:1.1rem;}
+  .verdict.ok{color:var(--ok);}
+  .verdict.bad{color:var(--bad);}
+  .explain{margin-top:8px; padding:12px 14px; background:rgba(120,120,120,.1); border-radius:10px; font-size:.95rem; line-height:1.4;}
+
+  /* Ergebnis */
+  .grade{font-size:3rem; font-weight:800; text-align:center; margin:6px 0;}
+  .result-line{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:.95rem;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Theme-Auswahl -->
+  <section id="screen-theme" class="card">
+    <h1>IPv4 und IPv6</h1>
+    <h2>Schicht 3</h2>
+    <p style="color:var(--muted); margin-top:0;">Wähle ein Farbschema, um zu starten.</p>
+    <div class="theme-grid">
+      <button class="theme-btn" data-theme="pastell"><span class="swatch sw-pastell"></span>Pastell – hell & freundlich</button>
+      <button class="theme-btn" data-theme="kraeftig"><span class="swatch sw-kraeftig"></span>Kräftig – lila & violett</button>
+      <button class="theme-btn" data-theme="dunkel"><span class="swatch sw-dunkel"></span>Dunkel – für IT-Damen</button>
+    </div>
+  </section>
+
+  <!-- Start -->
+  <section id="screen-start" class="card hidden">
+    <h1>IPv4 und IPv6</h1>
+    <h2>Schicht 3</h2>
+    <p style="color:var(--muted);"><span id="qcount"></span> Fragen warten auf dich.</p>
+    <button class="primary" id="btn-start">Quiz starten</button>
+    <button class="secondary" id="btn-change-theme">Theme wechseln</button>
+  </section>
+
+  <!-- Quiz -->
+  <section id="screen-quiz" class="card hidden">
+    <h1>IPv4 und IPv6</h1>
+    <h2>Schicht 3</h2>
+    <div class="statrow">
+      <span id="progress-label">Frage 1 / 1</span>
+      <span>✓ <span id="count-correct">0</span> &nbsp; ✗ <span id="count-wrong">0</span></span>
+    </div>
+    <div class="progress-outer"><div class="progress-inner" id="progress-bar"></div></div>
+    <p class="qtext" id="question-text"></p>
+    <div class="options" id="options"></div>
+    <div id="verdict" class="verdict hidden"></div>
+    <div id="explain" class="explain hidden"></div>
+    <button class="primary hidden" id="btn-next">Weiter</button>
+  </section>
+
+  <!-- Ergebnis -->
+  <section id="screen-result" class="card hidden">
+    <h1>Auswertung</h1>
+    <h2>Schicht 3 – IPv4 und IPv6</h2>
+    <div class="grade" id="grade-value"></div>
+    <p style="text-align:center; color:var(--muted); margin-top:-6px;" id="grade-label"></p>
+    <div class="result-line"><span>Richtige Antworten</span><span id="res-correct"></span></div>
+    <div class="result-line"><span>Falsche Antworten</span><span id="res-wrong"></span></div>
+    <div class="result-line"><span>Erreichte Punktzahl</span><span id="res-percent"></span></div>
+    <button class="primary" id="btn-restart">Neu mischen & nochmal spielen</button>
+    <button class="secondary" id="btn-back-theme">Theme wechseln</button>
+  </section>
+
+</div>
+
+<!-- JSON-Fragendaten: hier weitere Fragen nach diesem Schema ergänzen -->
+<script type="application/json" id="quiz-data">
+[
+  {
+    "id": "q1",
+    "statement": "Eine IPv4-Adresse besteht aus vier Gruppen mit jeweils 8 Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine IPv4-Adresse ist 32 Bit lang und wird in vier Blöcke (Oktette) zu je 8 Bit unterteilt, z. B. 192.168.0.1 – jede der vier Zahlen steht für ein Oktett."
+  },
+  {
+    "id": "q2",
+    "statement": "Eine IPv4-Adresse besitzt insgesamt 32 Byte.",
+    "isTrue": false,
+    "explanation": "Falsch: Eine IPv4-Adresse ist 32 Bit lang, nicht 32 Byte. Da 1 Byte = 8 Bit sind, entsprechen 32 Bit lediglich 4 Byte."
+  },
+  {
+    "id": "q3",
+    "statement": "8 Bit entsprechen einem Oktett.",
+    "isTrue": true,
+    "explanation": "Richtig: Der Begriff Oktett bezeichnet genau eine Gruppe von 8 Bit – daher besteht eine 32-Bit-IPv4-Adresse aus vier Oktetten."
+  },
+  {
+    "id": "q4",
+    "statement": "Die Punkte einer IPv4-Adresse benötigen im Speicher zusätzliche Bit.",
+    "isTrue": false,
+    "explanation": "Falsch: Die Punkte sind nur ein Hilfsmittel der Dezimalschreibweise (z. B. 192.168.0.1) für die menschliche Lesbarkeit. Im Speicher bzw. im Netzwerk liegt die Adresse als reine 32-Bit-Folge vor, ohne Trennzeichen und ohne zusätzliche Bit dafür."
+  },
+  {
+    "id": "q5",
+    "statement": "Die Dezimalschreibweise einer IPv4-Adresse dient unter anderem dazu, die Adresse für Menschen leichter lesbar zu machen.",
+    "isTrue": true,
+    "explanation": "Richtig: Statt die 32 Bit als lange Binärfolge zu notieren, wird jedes der vier Oktette als Dezimalzahl (0–255) geschrieben und durch Punkte getrennt – das ist für Menschen deutlich übersichtlicher als eine reine Bitfolge."
+  },
+  {
+    "id": "q6",
+    "statement": "Eine Subnetzmaske ist grundsätzlich 32 Bit lang.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine IPv4-Subnetzmaske ist wie die Adresse selbst 32 Bit lang, dargestellt in vier Oktetten (z. B. 255.255.255.0)."
+  },
+  {
+    "id": "q7",
+    "statement": "/24 bedeutet, dass die gesamte Subnetzmaske nur 24 Bit lang ist.",
+    "isTrue": false,
+    "explanation": "Falsch: Die Subnetzmaske ist immer 32 Bit lang. Die Zahl bei /24 (CIDR-Schreibweise) gibt lediglich an, wie viele der 32 Bit auf 1 gesetzt sind, also zur Netz-ID gehören. Die übrigen 8 Bit sind Nullen und stehen für den Hostanteil."
+  },
+  {
+    "id": "q8",
+    "statement": "Bei /24 enthält die Subnetzmaske 24 binäre Einsen.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Zahl hinter dem Schrägstrich in der CIDR-Schreibweise gibt genau die Anzahl der führenden Einsen in der 32-Bit-Subnetzmaske an. Bei /24 sind das 24 Einsen, gefolgt von 8 Nullen – das entspricht 255.255.255.0."
+  },
+  {
+    "id": "q9",
+    "statement": "Die klassische Subnetzmaske wird genau wie eine IPv4-Adresse in vier Oktette zu je 8 Bit unterteilt.",
+    "isTrue": true,
+    "explanation": "Richtig: Da die Subnetzmaske ebenfalls 32 Bit lang ist, wird auch sie in vier Oktette zu je 8 Bit gegliedert und in Dezimalschreibweise dargestellt, z. B. 255.255.255.0."
+  },
+  {
+    "id": "q10",
+    "statement": "Bei der CIDR-Schreibweise zählt man die binären Nullen der Subnetzmaske.",
+    "isTrue": false,
+    "explanation": "Falsch: Die Zahl hinter dem Schrägstrich (z. B. /24) gibt die Anzahl der binären Einsen an, also der Bit, die zur Netz-ID gehören – nicht die Nullen. Bei /24 stehen 24 Einsen für das Netz und die restlichen 8 Bit (Nullen) für den Hostanteil."
+  },
+  {
+    "id": "q11",
+    "statement": "Eine IP-Adresse, deren erstes Oktett 100 ist, gehört zur Class A.",
+    "isTrue": true,
+    "explanation": "Richtig: Class A umfasst die Werte 1–126 im ersten Oktett. Da 100 in diesem Bereich liegt, handelt es sich um eine Class-A-Adresse."
+  },
+  {
+    "id": "q12",
+    "statement": "Ein erstes Oktett von 150 bedeutet Class B.",
+    "isTrue": true,
+    "explanation": "Richtig: Class B umfasst die Werte 128–191 im ersten Oktett. 150 liegt in diesem Bereich, also handelt es sich um Class B."
+  },
+  {
+    "id": "q13",
+    "statement": "Ein erstes Oktett von 200 bedeutet Class C.",
+    "isTrue": true,
+    "explanation": "Richtig: Class C umfasst die Werte 192–223 im ersten Oktett. 200 liegt in diesem Bereich, also handelt es sich um Class C."
+  },
+  {
+    "id": "q14",
+    "statement": "Die Standardmaske von Class B lautet 255.255.0.0.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei Class B gehören klassisch die ersten beiden Oktette zur Netz-ID, die letzten beiden zum Hostanteil. Das entspricht der Standardmaske 255.255.0.0, also /16."
+  },
+  {
+    "id": "q15",
+    "statement": "/24 ist die klassische Standardsubnetzmaske von Class C.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei Class C gehören klassisch die ersten drei Oktette zur Netz-ID und nur das letzte zum Hostanteil, was der Standardmaske 255.255.255.0 bzw. /24 entspricht."
+  },
+  {
+    "id": "q16",
+    "statement": "Bei Class C gehören alle vier Oktette zur Netz-ID.",
+    "isTrue": false,
+    "explanation": "Falsch: Bei Class C gehören nur die ersten drei Oktette (24 Bit) zur Netz-ID. Das vierte Oktett bleibt für die Hostadressierung übrig – sonst gäbe es innerhalb des Netzes gar keine einzelnen Hosts mehr."
+  },
+  {
+    "id": "q17",
+    "statement": "Bei Class A stehen drei Oktette für den Hostanteil zur Verfügung.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei Class A gehört nur das erste Oktett zur Netz-ID (8 Bit), die restlichen drei Oktette (24 Bit) stehen für Hostadressen zur Verfügung – deshalb erlauben Class-A-Netze extrem viele Hosts."
+  },
+  {
+    "id": "q18",
+    "statement": "Je mehr Bit durch die Subnetzmaske zur Netz-ID gehören, desto weniger Bit bleiben für Hosts übrig.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Gesamtlänge ist immer 32 Bit. Jedes Bit, das der Netz-ID zugeschlagen wird, steht damit nicht mehr für Hostadressen zur Verfügung – Netz- und Hostanteil verhalten sich komplementär."
+  },
+  {
+    "id": "q19",
+    "statement": "192.168.1.0/24 bezeichnet einen einzelnen Computer.",
+    "isTrue": false,
+    "explanation": "Falsch: 192.168.1.0/24 mit der letzten Zahl 0 ist bei einem /24-Netz die Netzadresse, die das gesamte Netz repräsentiert – sie ist keinem einzelnen Rechner zugewiesen."
+  },
+  {
+    "id": "q20",
+    "statement": "192.168.1.0/24 bezeichnet ein gesamtes Netz.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Schreibweise Netzadresse/Präfixlänge (hier 192.168.1.0/24) beschreibt das gesamte Netz mit allen zugehörigen Hostadressen, nicht einen einzelnen Host."
+  },
+  {
+    "id": "q21",
+    "statement": "Bei 192.168.1.0/24 ist 192.168.1.0 die Netzadresse.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Netzadresse ergibt sich, wenn alle Host-Bit auf 0 gesetzt werden. Bei /24 ist das letzte Oktett der Hostanteil, also lautet die Netzadresse 192.168.1.0."
+  },
+  {
+    "id": "q22",
+    "statement": "Bei 192.168.1.0/24 ist 192.168.1.255 die Broadcast-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Broadcast-Adresse ergibt sich, wenn alle Host-Bit auf 1 gesetzt werden. Bei /24 ist das letzte Oktett der Hostanteil, also lautet die Broadcast-Adresse 192.168.1.255."
+  },
+  {
+    "id": "q23",
+    "statement": "192.168.1.255 kann in diesem Netz einem normalen Rechner zugewiesen werden.",
+    "isTrue": false,
+    "explanation": "Falsch: 192.168.1.255 ist in diesem /24-Netz die Broadcast-Adresse und dient dazu, alle Hosts im Netz gleichzeitig zu adressieren. Sie darf keinem einzelnen Gerät als Hostadresse zugewiesen werden."
+  },
+  {
+    "id": "q24",
+    "statement": "192.168.1.1 kann in diesem Netz als Hostadresse verwendet werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Die nutzbaren Hostadressen liegen zwischen Netzadresse (192.168.1.0) und Broadcast-Adresse (192.168.1.255), also von 192.168.1.1 bis 192.168.1.254. 192.168.1.1 liegt in diesem Bereich und ist gültig, z. B. häufig als Gateway-Adresse verwendet."
+  },
+  {
+    "id": "q25",
+    "statement": "192.168.1.254 kann in diesem Netz als Hostadresse verwendet werden.",
+    "isTrue": true,
+    "explanation": "Richtig: 192.168.1.254 ist die letzte nutzbare Hostadresse vor der Broadcast-Adresse 192.168.1.255 und darf einem Gerät zugewiesen werden."
+  },
+  {
+    "id": "q26",
+    "statement": "Ein /24-Netz besitzt insgesamt 256 Adressen, von denen klassisch 254 als Hostadressen zur Verfügung stehen.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /24 bleiben 8 Host-Bit, das ergibt 2⁸ = 256 Adressen insgesamt. Davon werden die erste (Netzadresse) und die letzte (Broadcast-Adresse) für Hosts abgezogen, sodass 254 nutzbare Hostadressen übrig bleiben."
+  },
+  {
+    "id": "q27",
+    "statement": "Bei 172.17.0.0/16 lautet die Broadcast-Adresse 172.17.255.255.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /16 sind die ersten beiden Oktette die Netz-ID, die letzten beiden der Hostanteil. Setzt man alle Host-Bit auf 1, ergibt sich 172.17.255.255 als Broadcast-Adresse."
+  },
+  {
+    "id": "q28",
+    "statement": "Bei 10.0.0.0/8 lautet die Broadcast-Adresse 10.255.255.255.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /8 ist nur das erste Oktett die Netz-ID, die restlichen drei Oktette sind der Hostanteil. Setzt man alle Host-Bit auf 1, ergibt sich 10.255.255.255 als Broadcast-Adresse."
+  },
+  {
+    "id": "q29",
+    "statement": "127.0.0.1 bezeichnet den eigenen Rechner.",
+    "isTrue": true,
+    "explanation": "Richtig: 127.0.0.1 ist die klassische Loopback-Adresse und verweist immer auf das eigene Gerät, unabhängig von dessen tatsächlicher Netzwerkkonfiguration."
+  },
+  {
+    "id": "q30",
+    "statement": "127.0.0.1 wird auch Loopback-Adresse genannt.",
+    "isTrue": true,
+    "explanation": "Richtig: Der gesamte Bereich 127.0.0.0/8 ist für Loopback-Zwecke reserviert, wobei 127.0.0.1 die am häufigsten verwendete Adresse dafür ist."
+  },
+  {
+    "id": "q31",
+    "statement": "Daten, die an 127.0.0.1 geschickt werden, müssen zunächst zum Router übertragen werden.",
+    "isTrue": false,
+    "explanation": "Falsch: Loopback-Verkehr verlässt den Rechner nie. Er wird bereits innerhalb des Betriebssystems bzw. des lokalen Netzwerkstacks an den eigenen Rechner zurückgegeben, ohne über den Router oder das physische Netzwerk zu laufen."
+  },
+  {
+    "id": "q32",
+    "statement": "10.0.0.0/8 ist ein privater IPv4-Adressbereich.",
+    "isTrue": true,
+    "explanation": "Richtig: 10.0.0.0/8 gehört zu den nach RFC 1918 reservierten privaten Adressbereichen und wird häufig in internen Netzen (LANs) verwendet."
+  },
+  {
+    "id": "q33",
+    "statement": "Jede Adresse, die mit 172 beginnt, ist privat.",
+    "isTrue": false,
+    "explanation": "Falsch: Nur der Bereich 172.16.0.0 bis 172.31.255.255 ist privat. Adressen wie 172.15.x.x oder 172.32.x.x beginnen zwar ebenfalls mit 172, liegen aber außerhalb dieses Bereichs und sind öffentlich."
+  },
+  {
+    "id": "q34",
+    "statement": "172.16.0.0 bis 172.31.255.255 gehört zum privaten Bereich.",
+    "isTrue": true,
+    "explanation": "Richtig: Dieser Bereich ist nach RFC 1918 als privater Adressraum reserviert und darf im öffentlichen Internet nicht geroutet werden."
+  },
+  {
+    "id": "q35",
+    "statement": "172.32.0.1 gehört ebenfalls zu diesem privaten Bereich.",
+    "isTrue": false,
+    "explanation": "Falsch: Der private Bereich endet bei 172.31.255.255. 172.32.0.1 liegt bereits außerhalb dieser Grenze und zählt zu den öffentlichen Adressen."
+  },
+  {
+    "id": "q36",
+    "statement": "Jede Adresse, die mit 192 beginnt, ist privat.",
+    "isTrue": false,
+    "explanation": "Falsch: Nur der Bereich 192.168.0.0 bis 192.168.255.255 (192.168.0.0/16) ist privat. Andere Adressen, die mit 192 beginnen, wie z. B. 192.0.2.x oder 192.169.x.x, sind nicht automatisch privat."
+  },
+  {
+    "id": "q37",
+    "statement": "Adressen aus 192.168.0.0/16 sind privat.",
+    "isTrue": true,
+    "explanation": "Richtig: Der gesamte Bereich 192.168.0.0 bis 192.168.255.255 ist nach RFC 1918 als privater Adressraum reserviert und wird typischerweise in Heim- und kleinen Firmennetzen verwendet."
+  },
+  {
+    "id": "q38",
+    "statement": "Eine Adresse aus 169.254.0.0/16 kann darauf hindeuten, dass die automatische Adressvergabe über DHCP nicht funktioniert hat.",
+    "isTrue": true,
+    "explanation": "Richtig: 169.254.0.0/16 ist der APIPA-Bereich. Vergibt sich ein Gerät selbst eine solche Adresse, ist das meist ein Zeichen dafür, dass kein DHCP-Server erreichbar war und die automatische Konfiguration fehlgeschlagen ist."
+  },
+  {
+    "id": "q39",
+    "statement": "Bei APIPA vergibt sich das Gerät selbst eine Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: APIPA (Automatic Private IP Addressing) sorgt dafür, dass sich ein Gerät ohne erreichbaren DHCP-Server selbstständig eine Adresse aus dem Bereich 169.254.0.0/16 zuweist, um zumindest im lokalen Segment kommunizieren zu können."
+  },
+  {
+    "id": "q40",
+    "statement": "0.0.0.0 und 127.0.0.1 haben dieselbe Bedeutung.",
+    "isTrue": false,
+    "explanation": "Falsch: 127.0.0.1 ist die Loopback-Adresse und verweist auf den eigenen Rechner. 0.0.0.0 hat eine andere Bedeutung, z. B. als Platzhalter für 'jede Adresse' bei Serverbindungen oder als Quelladresse bei DHCP-Anfragen, bevor eine Adresse zugewiesen wurde."
+  },
+  {
+    "id": "q41",
+    "statement": "Die Subnetzmaske muss immer der historischen Standardsubnetzmaske der IP-Klasse entsprechen.",
+    "isTrue": false,
+    "explanation": "Falsch: Durch CIDR und Subnetting kann die Subnetzmaske heute frei gewählt werden, unabhängig von der klassischen Class-A/B/C-Einteilung. So kann z. B. ein Class-C-Netz auch mit /25, /27 usw. unterteilt werden."
+  },
+  {
+    "id": "q42",
+    "statement": "Ein privater Class-A-Adressbereich kann beispielsweise mit /16 unterteilt werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Der private Class-A-Bereich 10.0.0.0/8 kann durch Subnetting in kleinere Netze wie z. B. /16-Netze aufgeteilt werden, um die Adressen sinnvoll auf verschiedene Standorte oder Abteilungen zu verteilen."
+  },
+  {
+    "id": "q43",
+    "statement": "10.0.0.0/16 verwendet 16 Bit für die Netz-ID.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Zahl hinter dem Schrägstrich gibt direkt die Anzahl der Netz-Bit an. Bei /16 gehören also 16 der 32 Bit zur Netz-ID."
+  },
+  {
+    "id": "q44",
+    "statement": "Bei /16 bleiben 16 Bit für Hosts übrig.",
+    "isTrue": true,
+    "explanation": "Richtig: Da insgesamt 32 Bit zur Verfügung stehen und 16 Bit für die Netz-ID verwendet werden, bleiben die restlichen 32 − 16 = 16 Bit für den Hostanteil."
+  },
+  {
+    "id": "q45",
+    "statement": "Bei /24 bleiben 24 Bit für Hosts übrig.",
+    "isTrue": false,
+    "explanation": "Falsch: Bei /24 werden 24 Bit für die Netz-ID verwendet, nicht für Hosts. Für den Hostanteil bleiben lediglich 32 − 24 = 8 Bit übrig."
+  },
+  {
+    "id": "q46",
+    "statement": "Je mehr Bit für die Netz-ID verwendet werden, desto weniger Host-Bit bleiben übrig.",
+    "isTrue": true,
+    "explanation": "Richtig: Da die Gesamtlänge fest bei 32 Bit liegt, verringert jedes zusätzliche Netz-Bit automatisch die Anzahl der verfügbaren Host-Bit."
+  },
+  {
+    "id": "q47",
+    "statement": "Eine größere CIDR-Zahl führt grundsätzlich zu kleineren einzelnen Netzen.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine größere CIDR-Zahl bedeutet mehr Netz-Bit und damit weniger Host-Bit, was zu weniger Adressen und somit kleineren Netzen führt (z. B. ist /28 kleiner als /24)."
+  },
+  {
+    "id": "q48",
+    "statement": "/24 bietet mehr Hosts pro einzelnem Netz als /16.",
+    "isTrue": false,
+    "explanation": "Falsch: Bei /16 bleiben 16 Host-Bit (65.534 nutzbare Hosts), bei /24 nur 8 Host-Bit (254 nutzbare Hosts). /16 bietet also deutlich mehr Hosts pro Netz als /24."
+  },
+  {
+    "id": "q49",
+    "statement": "/16 bietet mehr Hosts pro einzelnem Netz als /24.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /16 stehen 16 Host-Bit zur Verfügung (2¹⁶ = 65.536 Adressen, davon 65.534 nutzbar), während /24 nur 8 Host-Bit hat (256 Adressen, davon 254 nutzbar). /16 ermöglicht also deutlich mehr Hosts."
+  },
+  {
+    "id": "q50",
+    "statement": "Ein /24-Netz besitzt 256 Adressen.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /24 bleiben 8 Host-Bit übrig, das ergibt 2⁸ = 256 Adressen insgesamt (Netzadresse und Broadcast-Adresse eingeschlossen)."
+  },
+  {
+    "id": "q51",
+    "statement": "Von diesen 256 Adressen sind klassisch 254 als Hostadressen nutzbar.",
+    "isTrue": true,
+    "explanation": "Richtig: Von den 256 Adressen werden die erste (Netzadresse) und die letzte (Broadcast-Adresse) für gewöhnlich nicht an Hosts vergeben, sodass 254 Adressen für Geräte nutzbar bleiben."
+  },
+  {
+    "id": "q52",
+    "statement": "10.0.0.0/24 bedeutet, dass nur das erste Oktett zur Netz-ID gehört.",
+    "isTrue": false,
+    "explanation": "Falsch: /24 bedeutet, dass 24 Bit zur Netz-ID gehören – das entspricht den ersten drei Oktetten, nicht nur dem ersten. Nur das erste Oktett wäre bei /8 der Fall."
+  },
+  {
+    "id": "q53",
+    "statement": "/24 enthält 24 Einsen in der Subnetzmaske.",
+    "isTrue": true,
+    "explanation": "Richtig: Die CIDR-Zahl gibt direkt die Anzahl der binären Einsen in der Subnetzmaske an. Bei /24 sind das 24 Einsen, gefolgt von 8 Nullen, was 255.255.255.0 entspricht."
+  },
+  {
+    "id": "q54",
+    "statement": "Für zwei Subnetze muss ein zusätzliches Netz-Bit verwendet werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein zusätzliches Bit verdoppelt die Anzahl möglicher Kombinationen (2¹ = 2). Um ein Netz in zwei gleich große Teile zu splitten, wird also genau ein weiteres Bit der Netz-ID zugeschlagen."
+  },
+  {
+    "id": "q55",
+    "statement": "Aus /24 wird beim Teilen in zwei gleich große Subnetze /25.",
+    "isTrue": true,
+    "explanation": "Richtig: Um ein /24-Netz in zwei gleich große Subnetze aufzuteilen, wird ein zusätzliches Netz-Bit benötigt, wodurch aus /24 die Präfixlänge /25 wird."
+  },
+  {
+    "id": "q56",
+    "statement": "/25 entspricht 255.255.255.128.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /25 sind 25 Bit der Subnetzmaske auf 1 gesetzt. Im letzten Oktett ist das erste Bit eine 1 (Wert 128), der Rest Nullen – das ergibt 255.255.255.128."
+  },
+  {
+    "id": "q57",
+    "statement": "Ein /25-Subnetz besitzt 128 Adressen.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /25 bleiben 32 − 25 = 7 Host-Bit übrig, das ergibt 2⁷ = 128 Adressen pro Subnetz."
+  },
+  {
+    "id": "q58",
+    "statement": "Davon sind klassisch 126 Hostadressen nutzbar.",
+    "isTrue": true,
+    "explanation": "Richtig: Von den 128 Adressen eines /25-Subnetzes werden Netzadresse und Broadcast-Adresse abgezogen, sodass 126 Adressen für Hosts nutzbar bleiben."
+  },
+  {
+    "id": "q59",
+    "statement": "Das erste Subnetz reicht von 192.168.1.0 bis 192.168.1.127.",
+    "isTrue": true,
+    "explanation": "Richtig: Teilt man 192.168.1.0/24 in zwei /25-Subnetze, umfasst das erste Subnetz die Adressen 192.168.1.0 (Netzadresse) bis 192.168.1.127 (Broadcast-Adresse)."
+  },
+  {
+    "id": "q60",
+    "statement": "192.168.1.127 ist ein normaler Host des ersten Subnetzes.",
+    "isTrue": false,
+    "explanation": "Falsch: 192.168.1.127 ist bei einer Aufteilung in zwei /25-Subnetze die Broadcast-Adresse des ersten Subnetzes (192.168.1.0/25) und darf daher keinem einzelnen Gerät als Hostadresse zugewiesen werden."
+  },
+  {
+    "id": "q61",
+    "statement": "Das zweite Subnetz beginnt bei 192.168.1.128.",
+    "isTrue": true,
+    "explanation": "Richtig: Das zweite /25-Subnetz beginnt direkt nach dem Ende des ersten Subnetzes, also bei 192.168.1.128 als Netzadresse."
+  },
+  {
+    "id": "q62",
+    "statement": "192.168.1.128 kann einem PC als normale Hostadresse gegeben werden.",
+    "isTrue": false,
+    "explanation": "Falsch: 192.168.1.128 ist in diesem Zusammenhang die Netzadresse des zweiten /25-Subnetzes. Die Netzadresse identifiziert das Netz selbst und darf keinem einzelnen Gerät zugewiesen werden."
+  },
+  {
+    "id": "q63",
+    "statement": "192.168.1.255 ist die Broadcast-Adresse des zweiten Subnetzes.",
+    "isTrue": true,
+    "explanation": "Richtig: Das zweite /25-Subnetz reicht von 192.168.1.128 bis 192.168.1.255. Setzt man alle Host-Bit auf 1, ergibt sich 192.168.1.255 als Broadcast-Adresse dieses Subnetzes."
+  },
+  {
+    "id": "q64",
+    "statement": "Beim Subnetting werden aus den ursprünglichen Host-Bit einige Bit zu Netz-Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Subnetting funktioniert, indem man Bit vom Hostanteil 'ausleiht' und sie stattdessen zur Netz-ID zählt. Dadurch entstehen mehr, aber kleinere Subnetze."
+  },
+  {
+    "id": "q65",
+    "statement": "Je mehr Subnetze benötigt werden, desto mehr Bit müssen für die Subnetzbildung verwendet werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Da sich die Anzahl möglicher Subnetze mit jedem zusätzlichen Bit verdoppelt (2ⁿ), braucht man für mehr Subnetze entsprechend mehr geliehene Netz-Bit."
+  },
+  {
+    "id": "q66",
+    "statement": "Beim reversen Subnetting ist eine Host-IP gegeben und das zugehörige Subnetz soll gefunden werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Beim reversen (umgekehrten) Subnetting geht man nicht vom Gesamtnetz aus, sondern von einer einzelnen Host-Adresse und ermittelt daraus Netzadresse, Broadcast-Adresse und Adressbereich des zugehörigen Subnetzes."
+  },
+  {
+    "id": "q67",
+    "statement": "Bei /27 gehören 27 Bit zum Netzanteil.",
+    "isTrue": true,
+    "explanation": "Richtig: Die CIDR-Zahl gibt direkt die Länge des Netzanteils an. Bei /27 gehören also 27 der insgesamt 32 Bit zur Netz-ID."
+  },
+  {
+    "id": "q68",
+    "statement": "Bei /27 bleiben 5 Host-Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Von den 32 Bit gehören bei /27 27 Bit zum Netz. Für den Hostanteil bleiben damit 32 − 27 = 5 Bit übrig."
+  },
+  {
+    "id": "q69",
+    "statement": "2⁵ = 32, deshalb enthält ein /27-Subnetz 32 Adressen.",
+    "isTrue": true,
+    "explanation": "Richtig: Mit 5 verbleibenden Host-Bit lassen sich 2⁵ = 32 verschiedene Adressen darstellen – das entspricht der Gesamtzahl der Adressen in einem /27-Subnetz."
+  },
+  {
+    "id": "q70",
+    "statement": "/27 entspricht 255.255.255.224.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /27 sind im letzten Oktett die ersten 3 Bit auf 1 gesetzt (128+64+32=224), die restlichen 5 Bit sind 0. Das ergibt die Subnetzmaske 255.255.255.224."
+  },
+  {
+    "id": "q71",
+    "statement": "Um die Netzadresse zu erhalten, werden alle Host-Bit auf 0 gesetzt.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Netzadresse ist per Definition diejenige Adresse eines Subnetzes, bei der sämtliche Bit des Hostanteils den Wert 0 haben."
+  },
+  {
+    "id": "q72",
+    "statement": "Um die Broadcast-Adresse zu erhalten, werden alle Host-Bit auf 1 gesetzt.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Broadcast-Adresse ist per Definition diejenige Adresse eines Subnetzes, bei der sämtliche Bit des Hostanteils den Wert 1 haben."
+  },
+  {
+    "id": "q73",
+    "statement": "192.168.1.130/27 befindet sich im Subnetz 192.168.1.128/27.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /27 umfasst jedes Subnetz 32 Adressen. Das Subnetz 192.168.1.128/27 reicht von 128 bis 159. Da 130 in diesem Bereich liegt, gehört die Adresse zu diesem Subnetz."
+  },
+  {
+    "id": "q74",
+    "statement": "192.168.1.128 ist in diesem Beispiel die erste nutzbare Hostadresse.",
+    "isTrue": false,
+    "explanation": "Falsch: 192.168.1.128 ist die Netzadresse des Subnetzes 192.168.1.128/27, da hier alle Host-Bit auf 0 gesetzt sind. Sie darf keinem Host zugewiesen werden – die erste nutzbare Hostadresse ist 192.168.1.129."
+  },
+  {
+    "id": "q75",
+    "statement": "192.168.1.159 ist die Broadcast-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: Im Subnetz 192.168.1.128/27 (Bereich 128–159) ergibt sich die Broadcast-Adresse, wenn alle 5 Host-Bit auf 1 gesetzt werden: 128 + 31 = 159, also 192.168.1.159."
+  },
+  {
+    "id": "q76",
+    "statement": "Der erste nutzbare Host ist 192.168.1.129.",
+    "isTrue": true,
+    "explanation": "Richtig: Im Subnetz 192.168.1.128/27 (Bereich 128–159) ist 128 die Netzadresse. Die erste nutzbare Hostadresse liegt direkt danach, also bei 192.168.1.129."
+  },
+  {
+    "id": "q77",
+    "statement": "Der letzte nutzbare Host ist 192.168.1.158.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Broadcast-Adresse dieses Subnetzes ist 192.168.1.159. Die letzte nutzbare Hostadresse liegt direkt davor, also bei 192.168.1.158."
+  },
+  {
+    "id": "q78",
+    "statement": "/27 besitzt 27 Einsen und 5 Nullen.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei /27 sind die ersten 27 der 32 Bit auf 1 gesetzt (Netzanteil), die restlichen 5 Bit sind 0 (Hostanteil)."
+  },
+  {
+    "id": "q79",
+    "statement": "Gegenüber /24 wurden bei /27 drei zusätzliche Bit für die Netzbildung verwendet.",
+    "isTrue": true,
+    "explanation": "Richtig: /24 nutzt 24 Netz-Bit, /27 nutzt 27 Netz-Bit. Die Differenz beträgt 27 − 24 = 3 zusätzliche Bit, die für Subnetting verwendet wurden."
+  },
+  {
+    "id": "q80",
+    "statement": "Drei zusätzliche Netz-Bit ermöglichen 2³ = 8 Subnetze.",
+    "isTrue": true,
+    "explanation": "Richtig: Jedes zusätzliche Netz-Bit verdoppelt die Anzahl möglicher Subnetze. Mit 3 zusätzlichen Bit ergeben sich 2³ = 8 gleich große Subnetze aus dem ursprünglichen /24-Netz."
+  },
+  {
+    "id": "q81",
+    "statement": "Bei /27 bleiben fünf Host-Bit übrig.",
+    "isTrue": true,
+    "explanation": "Richtig: Von den 32 Bit gehören bei /27 27 Bit zum Netzanteil, sodass 32 − 27 = 5 Bit für den Hostanteil übrig bleiben."
+  },
+  {
+    "id": "q82",
+    "statement": "Fünf Host-Bit ermöglichen 2⁵ = 32 Adressen pro Subnetz.",
+    "isTrue": true,
+    "explanation": "Richtig: Mit 5 Host-Bit lassen sich 2⁵ = 32 unterschiedliche Adressen darstellen – das ist die Gesamtzahl der Adressen in jedem /27-Subnetz."
+  },
+  {
+    "id": "q83",
+    "statement": "Ein /27-Subnetz besitzt 30 klassisch nutzbare Hostadressen.",
+    "isTrue": true,
+    "explanation": "Richtig: Von den 32 Adressen eines /27-Subnetzes werden Netzadresse und Broadcast-Adresse abgezogen, sodass 32 − 2 = 30 Adressen für Hosts nutzbar bleiben."
+  },
+  {
+    "id": "q84",
+    "statement": "/27 entspricht 255.255.255.224.",
+    "isTrue": true,
+    "explanation": "Richtig: Im letzten Oktett sind bei /27 die ersten 3 Bit gesetzt (128+64+32=224), der Rest ist 0. Das ergibt die Subnetzmaske 255.255.255.224."
+  },
+  {
+    "id": "q85",
+    "statement": "Die drei zusätzlichen Einsen stehen für die Anzahl der Hostadressen.",
+    "isTrue": false,
+    "explanation": "Falsch: Die drei zusätzlichen Einsen im letzten Oktett der Subnetzmaske stehen für zusätzliche Netz-Bit, mit denen das ursprüngliche Netz in mehrere Subnetze unterteilt wird – nicht für die Anzahl der Hostadressen. Die Host-Anzahl ergibt sich stattdessen aus den verbleibenden Nullen."
+  },
+  {
+    "id": "q86",
+    "statement": "Die fünf Nullen stehen für den verbleibenden Hostanteil.",
+    "isTrue": true,
+    "explanation": "Richtig: Die fünf Nullen am Ende der Subnetzmaske (255.255.255.224) markieren den Hostanteil und legen fest, wie viele Adressen pro Subnetz zur Verfügung stehen (hier 2⁵ = 32)."
+  },
+  {
+    "id": "q87",
+    "statement": "Eine größere CIDR-Zahl lässt in diesem Fall weniger Host-Bit übrig.",
+    "isTrue": true,
+    "explanation": "Richtig: Da die Gesamtlänge immer 32 Bit beträgt, sinkt die Anzahl der verbleibenden Host-Bit mit jeder Erhöhung der CIDR-Zahl entsprechend."
+  },
+  {
+    "id": "q88",
+    "statement": "Eine IPv6-Adresse besitzt 128 Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine IPv6-Adresse ist mit 128 Bit deutlich länger als eine IPv4-Adresse (32 Bit), um den enorm größeren Adressraum zu ermöglichen."
+  },
+  {
+    "id": "q89",
+    "statement": "Eine IPv6-Adresse besitzt 8 Blöcke.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine IPv6-Adresse wird in 8 Blöcke (auch Hextets genannt) unterteilt, die durch Doppelpunkte getrennt werden, z. B. 2001:0db8:0000:0000:0000:0000:0000:0001."
+  },
+  {
+    "id": "q90",
+    "statement": "Ein IPv6-Block besitzt 4 Bit.",
+    "isTrue": false,
+    "explanation": "Falsch: Ein Block (Hextet) besteht aus 16 Bit, nicht 4. Das ergibt sich aus 128 Bit geteilt durch 8 Blöcke = 16 Bit pro Block. 4 Bit entsprechen stattdessen einem Nibble bzw. einer einzelnen Hex-Ziffer."
+  },
+  {
+    "id": "q91",
+    "statement": "Ein Nibble besitzt 4 Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein Nibble ist die Bezeichnung für eine Gruppe von 4 Bit, die genau einer hexadezimalen Ziffer (0–F) entspricht."
+  },
+  {
+    "id": "q92",
+    "statement": "Vier Nibble bilden einen Block.",
+    "isTrue": true,
+    "explanation": "Richtig: Vier Nibble zu je 4 Bit ergeben 16 Bit – das entspricht genau einem IPv6-Block, dargestellt durch vier Hex-Ziffern (z. B. 0db8)."
+  },
+  {
+    "id": "q93",
+    "statement": "Eine IPv6-Adresse besitzt insgesamt 32 Nibble.",
+    "isTrue": true,
+    "explanation": "Richtig: 128 Bit geteilt durch 4 Bit pro Nibble ergibt 32 Nibble – das entspricht auch den 32 Hex-Ziffern einer vollständig ausgeschriebenen IPv6-Adresse."
+  },
+  {
+    "id": "q94",
+    "statement": "Eine IPv6-Adresse besitzt 16 Byte.",
+    "isTrue": true,
+    "explanation": "Richtig: 128 Bit geteilt durch 8 Bit pro Byte ergibt 16 Byte – das ist die Speichergröße einer IPv6-Adresse."
+  },
+  {
+    "id": "q95",
+    "statement": "IPv6-Adressen werden grundsätzlich dezimal dargestellt.",
+    "isTrue": false,
+    "explanation": "Falsch: IPv6-Adressen werden hexadezimal dargestellt (Ziffern 0–9 und A–F), nicht dezimal. Nur bei IPv4 werden die Oktette dezimal geschrieben."
+  },
+  {
+    "id": "q96",
+    "statement": "Die Blöcke einer IPv6-Adresse werden durch Doppelpunkte getrennt.",
+    "isTrue": true,
+    "explanation": "Richtig: Die 8 Blöcke einer IPv6-Adresse werden durch Doppelpunkte voneinander getrennt, z. B. 2001:0db8:0000:0000:0000:0000:0000:0001."
+  },
+  {
+    "id": "q97",
+    "statement": "Führende Nullen eines Blocks dürfen weggelassen werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Zur Verkürzung der Schreibweise dürfen Nullen am Anfang eines Blocks entfallen, z. B. wird 0db8 zu db8."
+  },
+  {
+    "id": "q98",
+    "statement": "Bei 000A darf daraus A werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Da alle führenden Nullen entfernt werden dürfen, wird aus 000A schlicht A – die letzte Ziffer bleibt als einzige signifikante Ziffer stehen."
+  },
+  {
+    "id": "q99",
+    "statement": "Bei A000 darf daraus A werden.",
+    "isTrue": false,
+    "explanation": "Falsch: Es dürfen nur führende Nullen (also Nullen am Anfang) entfernt werden. Bei A000 steht die von Null verschiedene Ziffer bereits am Anfang, daher gibt es keine führenden Nullen zum Entfernen – der Block bleibt vollständig A000."
+  },
+  {
+    "id": "q100",
+    "statement": "0000 darf als 0 geschrieben werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein Block, der komplett aus Nullen besteht, darf auf eine einzelne 0 verkürzt werden, da auch hier die führenden Nullen entfallen und mindestens eine Ziffer stehen bleiben muss."
+  },
+  {
+    "id": "q101",
+    "statement": "Mehrere aufeinanderfolgende Nullblöcke können durch :: ersetzt werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine oder mehrere aufeinanderfolgende Gruppen von reinen Nullblöcken dürfen durch einen doppelten Doppelpunkt (::) ersetzt werden, um die Adresse weiter zu verkürzen."
+  },
+  {
+    "id": "q102",
+    "statement": ":: darf innerhalb derselben IPv6-Adresse mehrfach verwendet werden.",
+    "isTrue": false,
+    "explanation": "Falsch: Der doppelte Doppelpunkt (::) darf pro Adresse nur einmal verwendet werden. Bei mehrfacher Verwendung wäre nicht mehr eindeutig, wie viele Nullblöcke jeweils gemeint sind, die Adresse wäre also nicht mehr eindeutig rekonstruierbar."
+  },
+  {
+    "id": "q103",
+    "statement": "::1 ist eine gültige verkürzte IPv6-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: ::1 ist die verkürzte Schreibweise von 0000:0000:0000:0000:0000:0000:0000:0001 und eine gültige, vollständig zulässige IPv6-Adresse."
+  },
+  {
+    "id": "q104",
+    "statement": "::1 ist die IPv6-Loopback-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: ::1 entspricht bei IPv6 funktional der IPv4-Adresse 127.0.0.1 und verweist auf den eigenen Rechner (Loopback)."
+  },
+  {
+    "id": "q105",
+    "statement": "Eine IPv6-Subnetzmaske muss immer /64 sein.",
+    "isTrue": false,
+    "explanation": "Falsch: /64 ist zwar die übliche Standard-Präfixlänge für Endgeräte-Subnetze bei IPv6, aber nicht zwingend vorgeschrieben. Je nach Zweck (z. B. Punkt-zu-Punkt-Verbindungen, größere Aggregationen) können auch andere Präfixlängen verwendet werden."
+  },
+  {
+    "id": "q106",
+    "statement": "IPv6-Subnetting funktioniert ebenfalls mit Zweierpotenzen.",
+    "isTrue": true,
+    "explanation": "Richtig: Genau wie bei IPv4 basiert auch das Aufteilen von IPv6-Netzen in Subnetze auf Zweierpotenzen – jedes zusätzliche Netz-Bit verdoppelt die Anzahl möglicher Subnetze."
+  },
+  {
+    "id": "q107",
+    "statement": "Zwei Subnetze benötigen ein zusätzliches Netz-Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Um ein Netz in zwei gleich große Subnetze aufzuteilen, wird genau ein zusätzliches Bit benötigt, da 2¹ = 2 Kombinationen ermöglicht."
+  },
+  {
+    "id": "q108",
+    "statement": "Aus /64 wird beim Teilen in zwei gleich große Subnetze /65.",
+    "isTrue": true,
+    "explanation": "Richtig: Analog zum IPv4-Subnetting wird beim Halbieren eines /64-Netzes ein zusätzliches Netz-Bit verwendet, wodurch aus /64 die Präfixlänge /65 entsteht."
+  },
+  {
+    "id": "q109",
+    "statement": "Ein hexadezimales Zeichen repräsentiert vier Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein Hex-Zeichen (0–F) steht immer für genau 4 Bit (ein Nibble), da 2⁴ = 16 mögliche Werte existieren."
+  },
+  {
+    "id": "q110",
+    "statement": "Hexadezimal besitzt 16 verschiedene Zeichen von 0 bis F.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Hexadezimalsystem verwendet die Ziffern 0–9 sowie die Buchstaben A–F, insgesamt also 16 verschiedene Zeichen."
+  },
+  {
+    "id": "q111",
+    "statement": "Die Werte 0–9 entsprechen der ersten Hälfte der 16 möglichen Hex-Werte.",
+    "isTrue": false,
+    "explanation": "Falsch: Die erste Hälfte der 16 Hex-Werte umfasst 0–7 (8 Werte), nicht 0–9. Bei 0–9 wären es bereits 10 Werte – das ist mehr als die Hälfte von 16."
+  },
+  {
+    "id": "q112",
+    "statement": "Die Werte 8–F entsprechen der zweiten Hälfte.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Werte 8–F bilden die obere Hälfte der 16 Hex-Werte, da hier das erste Bit des Nibbles jeweils 1 ist (binär 1000–1111)."
+  },
+  {
+    "id": "q113",
+    "statement": "Bei /65 entscheidet ein zusätzliches Bit über die Zugehörigkeit zu einem der beiden Subnetze.",
+    "isTrue": true,
+    "explanation": "Richtig: /65 nutzt gegenüber /64 genau ein zusätzliches Bit, das entscheidet, ob eine Adresse zum ersten oder zweiten Subnetz gehört."
+  },
+  {
+    "id": "q114",
+    "statement": "Das erste Subnetz reicht in diesem Beispiel bis 2001:1234:5678:90AB:8FFF:FFFF:FFFF:FFFF.",
+    "isTrue": false,
+    "explanation": "Falsch: Das erste /65-Subnetz endet bei ...7FFF:FFFF:FFFF:FFFF, nicht bei 8FFF. Sobald der fünfte Block bei 8000 beginnt (erstes Bit = 1), gehört die Adresse bereits zum zweiten Subnetz."
+  },
+  {
+    "id": "q115",
+    "statement": "Das zweite Subnetz beginnt bei 2001:1234:5678:90AB:8000:0000:0000:0000.",
+    "isTrue": true,
+    "explanation": "Richtig: Sobald das erste Bit von Block 5 auf 1 gesetzt ist, beginnt der Hex-Wert bei 8000. Das zweite Subnetz startet also genau dort."
+  },
+  {
+    "id": "q116",
+    "statement": "Das zweite Subnetz endet bei 2001:1234:5678:90AB:EFFF:FFFF:FFFF:FFFF.",
+    "isTrue": false,
+    "explanation": "Falsch: Da bei /65 alle übrigen Host-Bit auf 1 gesetzt werden, endet das zweite Subnetz bei ...FFFF:FFFF:FFFF:FFFF, nicht bei EFFF. EFFF wäre nur dann korrekt, wenn zusätzliche Netz-Bit den Bereich weiter einschränken würden."
+  },
+  {
+    "id": "q117",
+    "statement": "Der „Mühlenbecker Pfeil“ ist eine international standardisierte IPv6-Notation.",
+    "isTrue": false,
+    "explanation": "Falsch: Eine offiziell standardisierte Bezeichnung mit diesem Namen gibt es nicht. Die genormte Kurzschreibweise für aufeinanderfolgende Nullblöcke heißt schlicht „::“. Prüfe schulinterne Begriffe wie diesen zusätzlich gegen dein Unterrichtsmaterial."
+  },
+  {
+    "id": "q118",
+    "statement": "Die „Mühlenbecker Gänsefüßchen“ sind lediglich eine schulinterne Rechenhilfe.",
+    "isTrue": true,
+    "explanation": "Sofern es sich um eine informelle, nicht offiziell genormte Merkhilfe aus deinem Unterricht handelt, ist das richtig – es gibt dazu keine RFC-Bezeichnung. Prüfe diesen Punkt trotzdem gegen dein Unterrichtsmaterial."
+  },
+  {
+    "id": "q119",
+    "statement": "Vier IPv6-Subnetze benötigen zwei zusätzliche Netz-Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Um ein Netz in vier gleich große Subnetze aufzuteilen, werden 2 zusätzliche Bit benötigt, da 2² = 4 Kombinationen ermöglicht."
+  },
+  {
+    "id": "q120",
+    "statement": "Aus /64 wird bei vier gleich großen Subnetzen /67.",
+    "isTrue": false,
+    "explanation": "Falsch: Mit 2 zusätzlichen Netz-Bit gegenüber /64 ergibt sich 64 + 2 = 66, also /66 – nicht /67. /67 würde bereits 8 Subnetze bedeuten (2³)."
+  },
+  {
+    "id": "q121",
+    "statement": "Bei /66 liegen die ersten 64 Netz-Bit vollständig in den ersten vier Blöcken.",
+    "isTrue": true,
+    "explanation": "Richtig: Jeder Block umfasst 16 Bit, vier Blöcke ergeben genau 64 Bit – die ersten 64 Netz-Bit füllen also exakt die ersten vier Blöcke."
+  },
+  {
+    "id": "q122",
+    "statement": "Bit 65 und 66 befinden sich in Block 6.",
+    "isTrue": false,
+    "explanation": "Falsch: Block 5 umfasst die Bit 65 bis 80. Die beiden zusätzlichen Netz-Bit für /66 (Bit 65 und 66) liegen also in Block 5, nicht in Block 6."
+  },
+  {
+    "id": "q123",
+    "statement": "Ein Hex-Zeichen entspricht vier Bit.",
+    "isTrue": true,
+    "explanation": "Richtig: Jede hexadezimale Ziffer steht für genau ein Nibble, also 4 Bit."
+  },
+  {
+    "id": "q124",
+    "statement": "Die vier Bereiche bei /66 lauten 0–3, 4–7, 8–B und C–E.",
+    "isTrue": false,
+    "explanation": "Falsch: Der letzte Bereich muss C–F lauten, nicht C–E, da die vier Viertel des Hex-Wertebereichs 0–F exakt 0–3, 4–7, 8–B und C–F sind. C–E würde den Wert F fälschlich ausschließen."
+  },
+  {
+    "id": "q125",
+    "statement": "Eine Adresse, deren fünfter Block mit 5 beginnt, gehört zum Bereich 4–7.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Hex-Ziffer 5 liegt im Bereich 4–7 (binär 0100), somit gehört eine solche Adresse zum zweiten der vier /66-Subnetze."
+  },
+  {
+    "id": "q126",
+    "statement": "Eine Adresse, deren fünfter Block mit A beginnt, gehört zum Bereich 4–7.",
+    "isTrue": false,
+    "explanation": "Falsch: Die Hex-Ziffer A liegt im Bereich 8–B (binär 1010), nicht im Bereich 4–7. Eine solche Adresse gehört zum dritten der vier /66-Subnetze."
+  },
+  {
+    "id": "q127",
+    "statement": "Eine Adresse, deren fünfter Block mit D beginnt, gehört zum Bereich C–F.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Hex-Ziffer D liegt im Bereich C–F (binär 1101), somit gehört eine solche Adresse zum vierten der vier /66-Subnetze."
+  },
+  {
+    "id": "q128",
+    "statement": "Beim Ermitteln des Netzanfangs werden alle Host-Bit auf 0 gesetzt.",
+    "isTrue": true,
+    "explanation": "Richtig: Der Netzanfang (die Netzadresse) ergibt sich, indem man alle Bit des Hostanteils auf 0 setzt."
+  },
+  {
+    "id": "q129",
+    "statement": "Beim Ermitteln des Netzendes werden alle Host-Bit auf 0 gesetzt.",
+    "isTrue": false,
+    "explanation": "Falsch: Das Netzende (die letzte Adresse des Bereichs) ergibt sich, indem alle Host-Bit auf 1 gesetzt werden, nicht auf 0. Alle Host-Bit auf 0 liefert stattdessen den Netzanfang."
+  },
+  {
+    "id": "q130",
+    "statement": "Binäre 1111 entsprechen hexadezimal F.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Bitmuster 1111 hat den Dezimalwert 15, was in hexadezimaler Schreibweise dem Zeichen F entspricht."
+  },
+  {
+    "id": "q131",
+    "statement": ":: ist die nicht spezifizierte IPv6-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: :: (alle 128 Bit auf 0) steht für 'keine Adresse' bzw. wird verwendet, wenn noch keine Adresse zugewiesen ist, ähnlich wie 0.0.0.0 bei IPv4."
+  },
+  {
+    "id": "q132",
+    "statement": "::1 ist die IPv6-Loopback-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: ::1 (127 Nullen gefolgt von einer 1) ist die Loopback-Adresse und verweist auf den eigenen Rechner."
+  },
+  {
+    "id": "q133",
+    "statement": "::1 entspricht funktional IPv4 0.0.0.0.",
+    "isTrue": false,
+    "explanation": "Falsch: ::1 entspricht funktional der IPv4-Loopback-Adresse 127.0.0.1, nicht 0.0.0.0. Die Adresse :: (ohne die 1) ist das IPv6-Gegenstück zu 0.0.0.0."
+  },
+  {
+    "id": "q134",
+    "statement": ":: entspricht funktional IPv4 0.0.0.0.",
+    "isTrue": true,
+    "explanation": "Richtig: Beide Adressen stehen für 'keine spezifische Adresse', z. B. als Platzhalter, bevor eine Adresse zugewiesen wurde."
+  },
+  {
+    "id": "q135",
+    "statement": "Global Unicast liegt im hier behandelten Bereich 3000::/3.",
+    "isTrue": false,
+    "explanation": "Falsch: Der Global-Unicast-Bereich ist 2000::/3, nicht 3000::/3. 2000::/3 umfasst die öffentlich routbaren IPv6-Adressen."
+  },
+  {
+    "id": "q136",
+    "statement": "Unique Local liegt im Bereich FC00::/7.",
+    "isTrue": true,
+    "explanation": "Richtig: FC00::/7 ist der Bereich für Unique Local Addresses (ULA), das IPv6-Gegenstück zu den privaten IPv4-Adressbereichen."
+  },
+  {
+    "id": "q137",
+    "statement": "FD00::1 ist eine Link-Local-Adresse.",
+    "isTrue": false,
+    "explanation": "Falsch: FD00::1 liegt im Bereich FC00::/7 und ist damit eine Unique-Local-Adresse (privater Adressbereich), keine Link-Local-Adresse. Link-Local-Adressen beginnen mit FE80::/10."
+  },
+  {
+    "id": "q138",
+    "statement": "FE80::1 ist eine Unique-Local-Adresse.",
+    "isTrue": false,
+    "explanation": "Falsch: FE80::1 liegt im Bereich FE80::/10 und ist damit eine Link-Local-Adresse, keine Unique-Local-Adresse. Unique-Local-Adressen beginnen mit FC00::/7."
+  },
+  {
+    "id": "q139",
+    "statement": "Link Local beginnt mit FE80::/8.",
+    "isTrue": false,
+    "explanation": "Falsch: Link-Local-Adressen beginnen mit dem Präfix FE80::/10, nicht /8. Ein /8-Präfix würde einen deutlich größeren, hier nicht gemeinten Adressbereich beschreiben."
+  },
+  {
+    "id": "q140",
+    "statement": "Link-Local-Adressen werden unter anderem für Neighbor Discovery verwendet.",
+    "isTrue": true,
+    "explanation": "Richtig: Link-Local-Adressen werden für die Kommunikation innerhalb desselben Netzsegments genutzt, z. B. für Neighbor Discovery (Adressauflösung, Router-Erkennung)."
+  },
+  {
+    "id": "q141",
+    "statement": "Link-Local-Adressen sollen über Router ins Internet weitergeleitet werden.",
+    "isTrue": false,
+    "explanation": "Falsch: Link-Local-Adressen sind ausschließlich für die Kommunikation innerhalb desselben lokalen Netzsegments gedacht. Router leiten sie nicht weiter, sie verlassen das lokale Segment nicht."
+  },
+  {
+    "id": "q142",
+    "statement": "Multicast beginnt mit FF00::/4.",
+    "isTrue": false,
+    "explanation": "Falsch: IPv6-Multicast-Adressen beginnen mit dem Präfix FF00::/8, nicht /4. Bei /4 wäre der Bereich deutlich größer als der tatsächlich für Multicast reservierte."
+  },
+  {
+    "id": "q143",
+    "statement": "IPv6 verwendet klassischen Broadcast genauso wie IPv4.",
+    "isTrue": false,
+    "explanation": "Falsch: IPv6 kennt kein klassisches Broadcast mehr. Die entsprechenden Funktionen werden stattdessen über Multicast realisiert."
+  },
+  {
+    "id": "q144",
+    "statement": "Multicast übernimmt in IPv6 Funktionen, für die bei IPv4 Broadcast verwendet wird.",
+    "isTrue": true,
+    "explanation": "Richtig: Da IPv6 kein Broadcast mehr besitzt, wurden entsprechende Aufgaben (z. B. Adressauflösung) auf spezielle Multicast-Gruppen übertragen."
+  },
+  {
+    "id": "q145",
+    "statement": "In FFXY stehen 4 Bit für Flags und 4 Bit für den Gültigkeitsbereich.",
+    "isTrue": true,
+    "explanation": "Richtig: Im Aufbau einer Multicast-Adresse (FF | Flags | Scope | Gruppen-ID) stehen nach dem FF-Byte jeweils 4 Bit für Flags (X) und 4 Bit für den Gültigkeitsbereich/Scope (Y)."
+  },
+  {
+    "id": "q146",
+    "statement": "Der IPv4-Header besitzt immer dieselbe Länge.",
+    "isTrue": false,
+    "explanation": "Falsch: Der IPv4-Header hat eine variable Länge, da er optionale Felder (Options) enthalten kann. Die Basislänge beträgt 20 Byte, kann durch Optionen aber auf bis zu 60 Byte anwachsen."
+  },
+  {
+    "id": "q147",
+    "statement": "Der IPv6-Basisheader besitzt eine feste Länge.",
+    "isTrue": true,
+    "explanation": "Richtig: Der IPv6-Basisheader ist immer genau 40 Byte lang. Zusätzliche Informationen werden bei Bedarf über separate Extension Header angehängt, statt den Basisheader zu verlängern."
+  },
+  {
+    "id": "q148",
+    "statement": "IPv4 verwendet das IHL-Feld zur Angabe der Headerlänge.",
+    "isTrue": true,
+    "explanation": "Richtig: Das IHL-Feld (Internet Header Length) gibt an, wie lang der IPv4-Header inklusive eventueller Optionen ist."
+  },
+  {
+    "id": "q149",
+    "statement": "IHL steht für Internet Header Length.",
+    "isTrue": true,
+    "explanation": "Richtig: IHL ist die Abkürzung für Internet Header Length und beschreibt die Länge des IPv4-Headers in 32-Bit-Wörtern."
+  },
+  {
+    "id": "q150",
+    "statement": "Der IPv4-Header kann Optionen enthalten.",
+    "isTrue": true,
+    "explanation": "Richtig: Der IPv4-Header besitzt ein optionales Options-Feld, mit dem zusätzliche Funktionen wie z. B. Routenaufzeichnung realisiert werden können, wodurch sich der Header verlängert."
+  },
+  {
+    "id": "q151",
+    "statement": "IPv6 verwendet Extension Header für zusätzliche Informationen.",
+    "isTrue": true,
+    "explanation": "Richtig: Statt Optionen im Basisheader unterzubringen, verkettet IPv6 bei Bedarf zusätzliche Extension Header (z. B. für Fragmentierung oder Sicherheit)."
+  },
+  {
+    "id": "q152",
+    "statement": "Der IPv4-Header besitzt eine Header-Prüfsumme.",
+    "isTrue": true,
+    "explanation": "Richtig: IPv4 enthält ein Header-Checksum-Feld, mit dem die Integrität des Headers (nicht der Nutzdaten) überprüft wird."
+  },
+  {
+    "id": "q153",
+    "statement": "Der IPv6-Basisheader besitzt ebenfalls eine Header-Prüfsumme.",
+    "isTrue": false,
+    "explanation": "Falsch: Der IPv6-Basisheader besitzt keine eigene Header-Prüfsumme mehr. Diese Aufgabe wird den darunterliegenden bzw. darüberliegenden Schichten (z. B. Sicherungsschicht, TCP/UDP) überlassen, um den Header zu vereinfachen und Router zu entlasten."
+  },
+  {
+    "id": "q154",
+    "statement": "IPv6 besitzt ein Traffic-Class-Feld.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Traffic-Class-Feld dient wie das ToS-Feld bei IPv4 zur Priorisierung von Datenverkehr (Quality of Service)."
+  },
+  {
+    "id": "q155",
+    "statement": "IPv6 besitzt ein Flow-Label-Feld.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Flow-Label-Feld kennzeichnet zusammengehörige Pakete eines Datenstroms, damit Router sie z. B. gleich behandeln oder auf demselben Pfad weiterleiten können."
+  },
+  {
+    "id": "q156",
+    "statement": "Traffic Class und Flow Label haben exakt dieselbe Aufgabe.",
+    "isTrue": false,
+    "explanation": "Falsch: Traffic Class dient der Priorisierung (Quality of Service), während Flow Label zusammengehörige Pakete eines Datenstroms kennzeichnet, damit diese z. B. konsistent geroutet werden. Es sind zwei unterschiedliche Funktionen."
+  },
+  {
+    "id": "q157",
+    "statement": "Next Header kann bei IPv6 auf einen folgenden Header verweisen.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Next-Header-Feld gibt an, welcher Header (z. B. ein Extension Header oder TCP/UDP) als Nächstes folgt, und ermöglicht so die Verkettung mehrerer Header."
+  },
+  {
+    "id": "q158",
+    "statement": "TTL gehört zum IPv4-Header.",
+    "isTrue": true,
+    "explanation": "Richtig: Das TTL-Feld (Time to Live) begrenzt die Lebensdauer eines Pakets im Netz, um Endlosschleifen zu verhindern. Bei IPv6 heißt das entsprechende Feld Hop Limit."
+  },
+  {
+    "id": "q159",
+    "statement": "Die TTL wird beim Durchlaufen von Routern verändert.",
+    "isTrue": true,
+    "explanation": "Richtig: Jeder Router, den ein Paket passiert, verringert den TTL-Wert um 1. So wird sichergestellt, dass Pakete nicht endlos im Netz kreisen."
+  },
+  {
+    "id": "q160",
+    "statement": "Wenn die TTL 0 erreicht, kann das Paket einfach unbegrenzt weitergeleitet werden.",
+    "isTrue": false,
+    "explanation": "Falsch: Erreicht die TTL den Wert 0, wird das Paket verworfen und nicht weitergeleitet. Der Router sendet in der Regel eine ICMP-Fehlermeldung ('Time Exceeded') an den Absender zurück."
+  },
+  {
+    "id": "q161",
+    "statement": "DHCP kann automatisch IP-Adressen vergeben.",
+    "isTrue": true,
+    "explanation": "Richtig: DHCP (Dynamic Host Configuration Protocol) automatisiert die Zuweisung von IP-Adressen sowie weiterer Netzwerkeinstellungen an Clients."
+  },
+  {
+    "id": "q162",
+    "statement": "DHCP kann auch Subnetzmaske, Gateway und DNS-Server übermitteln.",
+    "isTrue": true,
+    "explanation": "Richtig: Neben der IP-Adresse kann DHCP weitere wichtige Netzwerkparameter wie Subnetzmaske, Standard-Gateway und DNS-Server automatisch an den Client übermitteln."
+  },
+  {
+    "id": "q163",
+    "statement": "Die Lease-Time bestimmt die Gültigkeitsdauer einer Zuweisung.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Lease-Time (Mietdauer) legt fest, wie lange eine vom DHCP-Server vergebene Adresse gültig ist, bevor sie erneuert oder freigegeben werden muss."
+  },
+  {
+    "id": "q164",
+    "statement": "DORA steht für Discover, Offer, Reply, ACK.",
+    "isTrue": false,
+    "explanation": "Falsch: DORA steht für Discover, Offer, Request, Acknowledge (ACK) – der dritte Schritt heißt Request, nicht Reply. Mit Request fordert der Client die angebotene Adresse aktiv an."
+  },
+  {
+    "id": "q165",
+    "statement": "DISCOVER wird vom DHCP-Server gestartet.",
+    "isTrue": false,
+    "explanation": "Falsch: DISCOVER wird vom Client gestartet, der damit per Broadcast einen verfügbaren DHCP-Server im Netz sucht. Der Server antwortet erst danach mit OFFER."
+  },
+  {
+    "id": "q166",
+    "statement": "Beim DISCOVER kann 0.0.0.0 die Quelladresse sein.",
+    "isTrue": true,
+    "explanation": "Richtig: Da der Client zu diesem Zeitpunkt noch keine eigene IP-Adresse besitzt, verwendet er 0.0.0.0 als Quelladresse für die DISCOVER-Nachricht."
+  },
+  {
+    "id": "q167",
+    "statement": "255.255.255.255 ist eine Multicast-Adresse.",
+    "isTrue": false,
+    "explanation": "Falsch: 255.255.255.255 ist die begrenzte Broadcast-Adresse, mit der alle Geräte im lokalen Netzsegment erreicht werden – keine Multicast-Adresse. IPv4-Multicast-Adressen liegen im Bereich 224.0.0.0 bis 239.255.255.255."
+  },
+  {
+    "id": "q168",
+    "statement": "OFFER wird vom Client gesendet.",
+    "isTrue": false,
+    "explanation": "Falsch: OFFER wird vom DHCP-Server gesendet, als Antwort auf das DISCOVER des Clients. Der Server bietet dem Client damit eine verfügbare Adresse an."
+  },
+  {
+    "id": "q169",
+    "statement": "Mit REQUEST nimmt der Client das Angebot an.",
+    "isTrue": true,
+    "explanation": "Richtig: Mit der REQUEST-Nachricht signalisiert der Client, dass er das vom Server angebotene Adressangebot annehmen möchte."
+  },
+  {
+    "id": "q170",
+    "statement": "Mit ACK bestätigt der Server die Zuweisung.",
+    "isTrue": true,
+    "explanation": "Richtig: Mit dem ACK (Acknowledge) bestätigt der DHCP-Server final, dass die angeforderte Adresse dem Client zugewiesen wurde."
+  },
+  {
+    "id": "q171",
+    "statement": "Mit DECLINE kann der Client eine angebotene Adresse ablehnen.",
+    "isTrue": true,
+    "explanation": "Richtig: Stellt der Client fest, dass die zugewiesene Adresse bereits im Netz vergeben ist (Adresskonflikt), kann er sie mit DECLINE ablehnen."
+  },
+  {
+    "id": "q172",
+    "statement": "Nach einem Adresskonflikt bleibt die Adresse trotzdem für den Client gültig.",
+    "isTrue": false,
+    "explanation": "Falsch: Bei einem erkannten Adresskonflikt lehnt der Client die Adresse per DECLINE ab, und der DHCP-Prozess wird neu gestartet, um eine andere, konfliktfreie Adresse zu erhalten."
+  },
+  {
+    "id": "q173",
+    "statement": "Ein DHCP-Pool enthält Adressen, die der Server vergeben kann.",
+    "isTrue": true,
+    "explanation": "Richtig: Der DHCP-Pool ist der vom Administrator festgelegte Bereich an Adressen, aus dem der Server Zuweisungen an Clients vornehmen darf."
+  },
+  {
+    "id": "q174",
+    "statement": "Server sollten laut deinen Unterlagen bevorzugt ständig wechselnde DHCP-Adressen bekommen.",
+    "isTrue": false,
+    "explanation": "Falsch: Server sollten in der Regel feste (statische) Adressen oder DHCP-Reservierungen erhalten, damit sie unter einer konstanten Adresse erreichbar bleiben – nicht ständig wechselnde dynamische Adressen."
+  },
+  {
+    "id": "q175",
+    "statement": "Flexible/mobile Clients eignen sich eher schlecht für DHCP.",
+    "isTrue": false,
+    "explanation": "Falsch: Gerade flexible bzw. mobile Clients (z. B. Laptops, die das Netz wechseln) eignen sich besonders gut für DHCP, da sie so automatisch und ohne manuellen Aufwand eine passende Adresse im jeweiligen Netz erhalten."
+  },
+  {
+    "id": "q176",
+    "statement": "APIPA gehört zu IPv4.",
+    "isTrue": true,
+    "explanation": "Richtig: APIPA (Automatic Private IP Addressing) ist ein IPv4-Mechanismus zur automatischen Selbstadressierung, wenn kein DHCP-Server erreichbar ist."
+  },
+  {
+    "id": "q177",
+    "statement": "SLAAC gehört zu IPv6.",
+    "isTrue": true,
+    "explanation": "Richtig: SLAAC (Stateless Address Autoconfiguration) ist ein IPv6-Mechanismus, mit dem sich ein Client ohne DHCP-Server selbst konfigurieren kann."
+  },
+  {
+    "id": "q178",
+    "statement": "APIPA-Adressen beginnen typischerweise mit 192.254.",
+    "isTrue": false,
+    "explanation": "Falsch: APIPA-Adressen liegen im Bereich 169.254.0.0/16, beginnen also mit 169.254, nicht mit 192.254."
+  },
+  {
+    "id": "q179",
+    "statement": "APIPA wird ausschließlich von einem DHCP-Server vergeben.",
+    "isTrue": false,
+    "explanation": "Falsch: APIPA-Adressen werden gerade dann verwendet, wenn kein DHCP-Server erreichbar ist – das Gerät vergibt sich die Adresse selbst, ganz ohne Server."
+  },
+  {
+    "id": "q180",
+    "statement": "Ein Client kann sich eine APIPA-Adresse selbst geben.",
+    "isTrue": true,
+    "explanation": "Richtig: Bei APIPA weist sich das Gerät die Adresse eigenständig aus dem reservierten Bereich 169.254.0.0/16 zu, ohne dass ein Server beteiligt ist."
+  },
+  {
+    "id": "q181",
+    "statement": "Eine APIPA-Adresse liefert automatisch ein korrektes Standard-Gateway.",
+    "isTrue": false,
+    "explanation": "Falsch: APIPA liefert ausschließlich eine IP-Adresse ohne Gateway. Ohne funktionierenden DHCP-Server fehlt daher auch die Information über ein Standard-Gateway, wodurch keine Kommunikation außerhalb des lokalen Segments möglich ist."
+  },
+  {
+    "id": "q182",
+    "statement": "Eine APIPA-Konfiguration liefert automatisch einen DNS-Server.",
+    "isTrue": false,
+    "explanation": "Falsch: APIPA beschränkt sich rein auf die Selbstzuweisung einer IP-Adresse. Weder Gateway noch DNS-Server werden dabei automatisch bereitgestellt."
+  },
+  {
+    "id": "q183",
+    "statement": "Eine 169.254.x.x-Adresse kann bei der Fehlersuche ein Hinweis auf DHCP-Probleme sein.",
+    "isTrue": true,
+    "explanation": "Richtig: Findet man an einem Gerät eine Adresse aus dem APIPA-Bereich, deutet das meist darauf hin, dass kein DHCP-Server erreichbar war – ein wichtiger Ansatzpunkt bei der Fehlersuche."
+  },
+  {
+    "id": "q184",
+    "statement": "SLAAC ermöglicht eine automatische IPv6-Konfiguration.",
+    "isTrue": true,
+    "explanation": "Richtig: SLAAC erlaubt es einem Client, sich ganz ohne DHCPv6-Server selbstständig eine gültige IPv6-Adresse zuzuweisen."
+  },
+  {
+    "id": "q185",
+    "statement": "Bei SLAAC erhält der Client Informationen über das Präfix des Netzes.",
+    "isTrue": true,
+    "explanation": "Richtig: Über sogenannte Router Advertisements erhält der Client das Netzwerk-Präfix, das er anschließend mit einem selbst gebildeten Interface Identifier zu einer vollständigen Adresse kombiniert."
+  },
+  {
+    "id": "q186",
+    "statement": "Präfix und Interface Identifier bilden zusammen die IPv6-Adresse.",
+    "isTrue": true,
+    "explanation": "Richtig: Die vollständige IPv6-Adresse setzt sich aus dem vom Netz vorgegebenen Präfix (meist die ersten 64 Bit) und dem geräteindividuellen Interface Identifier (die restlichen 64 Bit) zusammen."
+  },
+  {
+    "id": "q187",
+    "statement": "Eine klassische MAC-Adresse besitzt 64 Bit.",
+    "isTrue": false,
+    "explanation": "Falsch: Eine klassische MAC-Adresse ist 48 Bit lang, nicht 64 Bit. Erst durch das EUI-64-Verfahren wird sie für IPv6 auf eine 64-Bit-Kennung erweitert."
+  },
+  {
+    "id": "q188",
+    "statement": "Das in deinen Unterlagen beschriebene Verfahren erweitert sie mithilfe von FFFE.",
+    "isTrue": true,
+    "explanation": "Richtig: Beim EUI-64-Verfahren wird die 48-Bit-MAC-Adresse in der Mitte um die 16-Bit-Sequenz FFFE ergänzt, um daraus eine 64-Bit-Interface-ID zu bilden."
+  },
+  {
+    "id": "q189",
+    "statement": "DNS dient der Namensauflösung.",
+    "isTrue": true,
+    "explanation": "Richtig: DNS (Domain Name System) übersetzt für Menschen lesbare Namen (z. B. www.beispiel.de) in die zugehörigen IP-Adressen."
+  },
+  {
+    "id": "q190",
+    "statement": "nslookup kann zur Untersuchung der Namensauflösung verwendet werden.",
+    "isTrue": true,
+    "explanation": "Richtig: nslookup ist ein Kommandozeilen-Tool, mit dem sich DNS-Abfragen manuell testen und die Namensauflösung überprüfen lässt."
+  },
+  {
+    "id": "q191",
+    "statement": "FQDN steht für Fully Qualified Domain Name.",
+    "isTrue": true,
+    "explanation": "Richtig: FQDN bezeichnet den vollständig qualifizierten Domainnamen, der zusammen mit allen übergeordneten Domainebenen eindeutig im DNS aufgelöst werden kann."
+  },
+  {
+    "id": "q192",
+    "statement": "NetBIOS-Namen können laut deinen Unterlagen maximal 15 Zeichen lang sein.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein NetBIOS-Name ist auf 15 nutzbare Zeichen begrenzt (ein 16. Byte wird intern für den Dienst-Typ reserviert) – deutlich kürzer als ein DNS-Name."
+  },
+  {
+    "id": "q193",
+    "statement": "Ein NetBIOS-Broadcast ist für die Namensauflösung über das gesamte Internet geeignet.",
+    "isTrue": false,
+    "explanation": "Falsch: Broadcasts bleiben innerhalb der eigenen Broadcast-Domain und werden von Routern nicht weitergeleitet. Ein NetBIOS-Broadcast kann daher nur im lokalen Netzsegment zur Namensauflösung dienen, nicht über das gesamte Internet."
+  },
+  {
+    "id": "q194",
+    "statement": "Broadcasts bleiben grundsätzlich innerhalb ihrer Broadcast-Domain.",
+    "isTrue": true,
+    "explanation": "Richtig: Router trennen Broadcast-Domains und leiten Broadcast-Pakete normalerweise nicht weiter, sodass sie auf das lokale Netzsegment beschränkt bleiben."
+  },
+  {
+    "id": "q195",
+    "statement": "lmhosts ist ein älteres Verfahren zur Namensauflösung.",
+    "isTrue": true,
+    "explanation": "Richtig: lmhosts ist eine lokale Textdatei, die früher zur statischen Zuordnung von NetBIOS-Namen zu IP-Adressen verwendet wurde, bevor sich DNS durchsetzte."
+  },
+  {
+    "id": "q196",
+    "statement": "WINS wurde für DNS-Namensauflösung verwendet.",
+    "isTrue": false,
+    "explanation": "Falsch: WINS (Windows Internet Name Service) diente der NetBIOS-Namensauflösung, nicht der DNS-Namensauflösung. Es handelt sich um zwei unterschiedliche Namenssysteme."
+  },
+  {
+    "id": "q197",
+    "statement": "DNS kann Namen über Netzgrenzen hinweg auflösen.",
+    "isTrue": true,
+    "explanation": "Richtig: Anders als NetBIOS-Broadcasts funktioniert DNS über Netzgrenzen hinweg, da es auf gezielten Abfragen an DNS-Server basiert statt auf lokalen Broadcasts."
+  },
+  {
+    "id": "q198",
+    "statement": "FQDN steht für Fully Qualified Domain Name.",
+    "isTrue": true,
+    "explanation": "Richtig: FQDN bezeichnet den vollständig qualifizierten Domainnamen, der eindeutig im DNS aufgelöst werden kann."
+  },
+  {
+    "id": "q199",
+    "statement": "Ein FQDN besteht aus hierarchisch angeordneten Bestandteilen.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein FQDN ist hierarchisch aufgebaut, von der Top-Level-Domain über die Domain bis hin zu Subdomains bzw. Hostnamen."
+  },
+  {
+    "id": "q200",
+    "statement": "Diese Bestandteile werden durch Kommata getrennt.",
+    "isTrue": false,
+    "explanation": "Falsch: Die Bestandteile eines FQDN werden durch Punkte getrennt (z. B. www.bfw.de), nicht durch Kommata."
+  },
+  {
+    "id": "q201",
+    "statement": "Ein einzelnes DNS-Label darf maximal 63 Zeichen besitzen.",
+    "isTrue": true,
+    "explanation": "Richtig: Jedes einzelne Label eines DNS-Namens (also der Text zwischen zwei Punkten) darf laut Standard maximal 63 Zeichen lang sein."
+  },
+  {
+    "id": "q202",
+    "statement": "Ein vollständiger DNS-Name kann wesentlich länger als ein NetBIOS-Name sein.",
+    "isTrue": true,
+    "explanation": "Richtig: Während ein NetBIOS-Name auf 15 Zeichen begrenzt ist, kann ein vollständiger DNS-Name (FQDN) insgesamt bis zu 253 Zeichen umfassen."
+  },
+  {
+    "id": "q203",
+    "statement": ".de ist eine Second-Level-Domain.",
+    "isTrue": false,
+    "explanation": "Falsch: .de ist eine Top-Level-Domain (TLD), die höchste Ebene der DNS-Hierarchie. Eine Second-Level-Domain wäre z. B. der Teil 'bfw' in bfw.de."
+  },
+  {
+    "id": "q204",
+    "statement": "www.bfw.de ist ein DNS-Name.",
+    "isTrue": true,
+    "explanation": "Richtig: www.bfw.de ist ein vollständig qualifizierter DNS-Name, bestehend aus Hostname (www), Domain (bfw) und Top-Level-Domain (de)."
+  },
+  {
+    "id": "q205",
+    "statement": "proxy.itm.internal ist für ein internes DNS geeignet.",
+    "isTrue": true,
+    "explanation": "Richtig: Namen mit der Endung .internal sind für die interne Namensauflösung innerhalb eines Unternehmens vorgesehen und nicht für die Verwendung im öffentlichen Internet gedacht."
+  },
+  {
+    "id": "q206",
+    "statement": ".internal ist laut deinen Unterlagen für interne DNS-Namen vorgesehen.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Endung .internal ist speziell für die Verwendung in internen, nicht öffentlich aufgelösten Namensräumen reserviert."
+  },
+  {
+    "id": "q207",
+    "statement": "Routing ermöglicht Kommunikation zwischen unterschiedlichen IP-Netzen.",
+    "isTrue": true,
+    "explanation": "Richtig: Routing sorgt dafür, dass Pakete zwischen verschiedenen IP-Netzen weitergeleitet werden, die sonst voneinander getrennt wären."
+  },
+  {
+    "id": "q208",
+    "statement": "Ein Standard-Gateway wird benötigt, um Ziele außerhalb des eigenen Netzes zu erreichen.",
+    "isTrue": true,
+    "explanation": "Richtig: Das Standard-Gateway ist die Adresse eines Routers, an den ein Host Pakete schickt, deren Ziel außerhalb des eigenen Netzes liegt."
+  },
+  {
+    "id": "q209",
+    "statement": "Statische Routen werden automatisch von RIP erzeugt.",
+    "isTrue": false,
+    "explanation": "Falsch: Statische Routen werden manuell von einem Administrator eingerichtet. RIP ist im Gegensatz dazu ein dynamisches Routingprotokoll, das Routen automatisch austauscht und berechnet."
+  },
+  {
+    "id": "q210",
+    "statement": "RIP ist ein dynamisches Routingprotokoll.",
+    "isTrue": true,
+    "explanation": "Richtig: RIP (Routing Information Protocol) tauscht automatisch Routing-Informationen zwischen Routern aus, ohne dass diese manuell konfiguriert werden müssen."
+  },
+  {
+    "id": "q211",
+    "statement": "OSPF ist ein statisches Routingprotokoll.",
+    "isTrue": false,
+    "explanation": "Falsch: OSPF (Open Shortest Path First) ist ein dynamisches Routingprotokoll, das Routing-Informationen automatisch zwischen Routern austauscht und aktualisiert."
+  },
+  {
+    "id": "q212",
+    "statement": "RIP verwendet den Hop Count als Metrik.",
+    "isTrue": true,
+    "explanation": "Richtig: RIP bewertet Routen anhand der Anzahl der zu durchlaufenden Router (Hops) und wählt den Weg mit der geringsten Hop-Anzahl."
+  },
+  {
+    "id": "q213",
+    "statement": "OSPF verwendet eine Cost-Metrik.",
+    "isTrue": true,
+    "explanation": "Richtig: OSPF berechnet Routen anhand einer Kosten-Metrik (Cost), die meist von der Bandbreite der Verbindung abhängt, statt nur die Anzahl der Hops zu zählen."
+  },
+  {
+    "id": "q214",
+    "statement": "Eine Route auf 192.168.2.0/24 kann alle Hosts dieses Netzes abdecken.",
+    "isTrue": true,
+    "explanation": "Richtig: Eine Route mit der Präfixlänge /24 auf die Netzadresse deckt automatisch alle Hostadressen dieses gesamten Subnetzes ab."
+  },
+  {
+    "id": "q215",
+    "statement": "Eine Route auf 192.168.2.22/32 gilt für das gesamte /24-Netz.",
+    "isTrue": false,
+    "explanation": "Falsch: /32 bezeichnet eine reine Host-Route, die ausschließlich für genau diese eine Adresse (192.168.2.22) gilt, nicht für das gesamte umgebende /24-Netz."
+  },
+  {
+    "id": "q216",
+    "statement": "255.255.255.255 entspricht /32.",
+    "isTrue": true,
+    "explanation": "Richtig: Die Subnetzmaske 255.255.255.255 besteht komplett aus Einsen (32 Stück) und entspricht damit der Präfixlänge /32, die genau eine einzelne Adresse beschreibt."
+  },
+  {
+    "id": "q217",
+    "statement": "255.255.255.0 entspricht /16.",
+    "isTrue": false,
+    "explanation": "Falsch: 255.255.255.0 enthält 24 Einsen und entspricht damit /24, nicht /16. /16 würde der Maske 255.255.0.0 entsprechen."
+  },
+  {
+    "id": "q218",
+    "statement": "Für zwei einzelne Hosts können zwei separate Host-Routen angelegt werden.",
+    "isTrue": true,
+    "explanation": "Richtig: Für gezielte Sonderfälle lassen sich pro Host jeweils eigene /32-Host-Routen anlegen, um deren Datenverkehr individuell zu steuern."
+  },
+  {
+    "id": "q219",
+    "statement": "Eine Host-Route /32 deckt automatisch das gesamte /24-Netz ab.",
+    "isTrue": false,
+    "explanation": "Falsch: Eine /32-Route gilt ausschließlich für die eine spezifische Hostadresse. Sie deckt nicht automatisch das gesamte umgebende /24-Netz ab – dafür wäre eine eigene Route auf das /24-Netz nötig."
+  },
+  {
+    "id": "q220",
+    "statement": "192.168.1.2 ist in den Beispielbefehlen der Router, an den die entsprechenden Pakete weitergegeben werden.",
+    "isTrue": true,
+    "explanation": "Richtig: In den zugehörigen Routing-Beispielen fungiert 192.168.1.2 als Next-Hop-Adresse, also der Router, an den die betroffenen Pakete zur Weiterleitung übergeben werden."
+  },
+  {
+    "id": "q221",
+    "statement": "Ein Layer-3-Switch kombiniert Switching- und Routingfunktionen.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein Layer-3-Switch vereint die schnelle Paketweiterleitung eines klassischen Switches mit Routing-Funktionen, die sonst ein separater Router übernehmen müsste."
+  },
+  {
+    "id": "q222",
+    "statement": "Ein Layer-3-Switch kann VLANs bilden.",
+    "isTrue": true,
+    "explanation": "Richtig: Wie ein Layer-2-Switch kann auch ein Layer-3-Switch Ports zu VLANs zusammenfassen und damit ein physisches Netz logisch segmentieren."
+  },
+  {
+    "id": "q223",
+    "statement": "Ein Layer-3-Switch kann nicht zwischen VLANs routen.",
+    "isTrue": false,
+    "explanation": "Falsch: Genau das ist die zentrale zusätzliche Fähigkeit eines Layer-3-Switches gegenüber einem reinen Layer-2-Switch – er kann Pakete zwischen verschiedenen VLANs routen (Inter-VLAN-Routing), ohne einen externen Router zu benötigen."
+  },
+  {
+    "id": "q224",
+    "statement": "Routing gehört zum OSI-Layer 3.",
+    "isTrue": true,
+    "explanation": "Richtig: Routing basiert auf IP-Adressen und wird der Vermittlungsschicht (Layer 3) des OSI-Modells zugeordnet, während klassisches Switching auf Layer 2 (Sicherungsschicht) stattfindet."
+  },
+  {
+    "id": "q225",
+    "statement": "Geräte unterschiedlicher VLANs können ohne Routing grundsätzlich so kommunizieren, als befänden sie sich im selben VLAN.",
+    "isTrue": false,
+    "explanation": "Falsch: VLANs trennen Netzsegmente auf Layer 2 strikt voneinander. Geräte in unterschiedlichen VLANs können ohne Routing (Inter-VLAN-Routing) grundsätzlich nicht direkt miteinander kommunizieren."
+  },
+  {
+    "id": "q226",
+    "statement": "VLANs können ein physisches LAN logisch segmentieren.",
+    "isTrue": true,
+    "explanation": "Richtig: VLANs erlauben es, ein einziges physisches Netzwerk in mehrere logisch getrennte Broadcast-Domains zu unterteilen, ohne dass dafür zusätzliche physische Verkabelung nötig ist."
+  },
+  {
+    "id": "q227",
+    "statement": "Zwei Geräte im selben VLAN benötigen für jede Kommunikation zwingend Inter-VLAN-Routing.",
+    "isTrue": false,
+    "explanation": "Falsch: Geräte im selben VLAN befinden sich in derselben Broadcast-Domain und können direkt über Switching (Layer 2) miteinander kommunizieren. Inter-VLAN-Routing wird nur benötigt, wenn Geräte in unterschiedlichen VLANs kommunizieren wollen."
+  },
+  {
+    "id": "q228",
+    "statement": "Kommunikation zwischen unterschiedlichen VLANs wird als Inter-VLAN-Routing bezeichnet.",
+    "isTrue": true,
+    "explanation": "Richtig: Der Fachbegriff für das Routen von Datenverkehr zwischen verschiedenen VLANs lautet Inter-VLAN-Routing."
+  },
+  {
+    "id": "q229",
+    "statement": "Ein klassischer Layer-2-VLAN-Switch trennt die unterschiedlichen VLANs zunächst voneinander.",
+    "isTrue": true,
+    "explanation": "Richtig: Ein reiner Layer-2-Switch kann zwar VLANs einrichten und deren Datenverkehr voneinander isolieren, aber selbst keine Kommunikation zwischen den VLANs ermöglichen – dafür fehlt ihm die Routing-Funktion."
+  },
+  {
+    "id": "q230",
+    "statement": "Ein Layer-2-Switch kann diese VLAN-Grenze durch Routing überwinden.",
+    "isTrue": false,
+    "explanation": "Falsch: Ein reiner Layer-2-Switch besitzt keine Routing-Funktion und kann die VLAN-Grenzen daher nicht überwinden. Dafür wird ein Layer-3-Switch oder ein separater Router benötigt."
+  }
+]
+</script>
+
+<script>
+(function(){
+  const THEMES = {
+    pastell: {
+      '--bg':'#fbfdfb', '--card':'#ffffff', '--text':'#33403a', '--muted':'#6f8079',
+      '--accent':'#a7e3bd', '--accent2':'#bfe3ff', '--ok':'#3f9e5e', '--bad':'#e08a9a',
+      '--border':'#e5efe8', '--btnText':'#2c3a33'
+    },
+    kraeftig: {
+      '--bg':'#3a2a4d', '--card':'#4a3661', '--text':'#f4ecfa', '--muted':'#cbb8dd',
+      '--accent':'#c9789e', '--accent2':'#e08b2b', '--ok':'#7fd39a', '--bad':'#f28b8b',
+      '--border':'#5e4778', '--btnText':'#2a1c38'
+    },
+    dunkel: {
+      '--bg':'#12141c', '--card':'#1c1f2b', '--text':'#e8e9f0', '--muted':'#9a9db0',
+      '--accent':'#8a7fd6', '--accent2':'#5aa9c9', '--ok':'#5fbf7a', '--bad':'#e2626f',
+      '--border':'#2c3040', '--btnText':'#12141c'
+    }
+  };
+
+  const questions = JSON.parse(document.getElementById('quiz-data').textContent);
+  let order = [];
+  let idx = 0, correct = 0, wrong = 0, answered = false;
+
+  const el = id => document.getElementById(id);
+  const screens = { theme: el('screen-theme'), start: el('screen-start'), quiz: el('screen-quiz'), result: el('screen-result') };
+  function show(name){ Object.values(screens).forEach(s=>s.classList.add('hidden')); screens[name].classList.remove('hidden'); }
+
+  function applyTheme(name){
+    const t = THEMES[name];
+    for(const k in t) document.documentElement.style.setProperty(k, t[k]);
+  }
+
+  document.querySelectorAll('.theme-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      applyTheme(btn.dataset.theme);
+      el('qcount').textContent = questions.length;
+      show('start');
+    });
+  });
+  el('btn-change-theme').addEventListener('click', ()=>show('theme'));
+  el('btn-back-theme').addEventListener('click', ()=>show('theme'));
+
+  function shuffledOrder(){
+    const a = questions.map((_,i)=>i);
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function startQuiz(){
+    order = shuffledOrder();
+    idx = 0; correct = 0; wrong = 0;
+    show('quiz');
+    renderQuestion();
+  }
+  el('btn-start').addEventListener('click', startQuiz);
+  el('btn-restart').addEventListener('click', startQuiz);
+
+  function renderQuestion(){
+    answered = false;
+    const q = questions[order[idx]];
+    el('progress-label').textContent = `Frage ${idx+1} / ${questions.length}`;
+    el('count-correct').textContent = correct;
+    el('count-wrong').textContent = wrong;
+    el('progress-bar').style.width = ((idx)/questions.length*100) + '%';
+    el('question-text').textContent = q.statement;
+    el('verdict').classList.add('hidden');
+    el('explain').classList.add('hidden');
+    el('btn-next').classList.add('hidden');
+
+    const optsWrap = el('options');
+    optsWrap.innerHTML = '';
+    [{label:'Richtig', value:true},{label:'Falsch', value:false}].forEach(opt=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = opt.label;
+      b.addEventListener('click', ()=>selectAnswer(opt.value, q, b));
+      optsWrap.appendChild(b);
+    });
+  }
+
+  function selectAnswer(chosenValue, q, clickedBtn){
+    if(answered) return;
+    answered = true;
+    const buttons = el('options').querySelectorAll('.opt');
+    buttons.forEach(b=>b.disabled = true);
+    const isCorrect = chosenValue === q.isTrue;
+    clickedBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if(!isCorrect){
+      buttons.forEach(b=>{
+        const isTrueBtn = b.textContent === 'Richtig';
+        if(isTrueBtn === q.isTrue) b.classList.add('correct');
+      });
+    }
+
+    if(isCorrect) correct++; else wrong++;
+    el('count-correct').textContent = correct;
+    el('count-wrong').textContent = wrong;
+
+    const v = el('verdict');
+    v.textContent = isCorrect ? 'Richtig' : 'Falsch';
+    v.className = 'verdict ' + (isCorrect ? 'ok' : 'bad');
+    v.classList.remove('hidden');
+
+    const ex = el('explain');
+    ex.textContent = q.explanation;
+    ex.classList.remove('hidden');
+
+    el('btn-next').classList.remove('hidden');
+    el('progress-bar').style.width = ((idx+1)/questions.length*100) + '%';
+  }
+
+  el('btn-next').addEventListener('click', ()=>{
+    idx++;
+    if(idx >= questions.length){ showResult(); }
+    else{ renderQuestion(); }
+  });
+
+  function gradeFor(percent){
+    if(percent >= 92) return [1,'sehr gut'];
+    if(percent >= 81) return [2,'gut'];
+    if(percent >= 67) return [3,'befriedigend'];
+    if(percent >= 50) return [4,'ausreichend'];
+    if(percent >= 30) return [5,'mangelhaft'];
+    return [6,'ungenügend'];
+  }
+
+  function showResult(){
+    const total = questions.length;
+    const percent = Math.round((correct/total)*100);
+    const [grade, label] = gradeFor(percent);
+    el('grade-value').textContent = grade;
+    el('grade-label').textContent = label + ' (IHK-Bewertungsmaßstab)';
+    el('res-correct').textContent = correct;
+    el('res-wrong').textContent = wrong;
+    el('res-percent').textContent = percent + ' %';
+    show('result');
+  }
+})();
+</script>
+</body>
+</html>
